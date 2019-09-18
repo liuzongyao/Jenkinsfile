@@ -1,0 +1,18 @@
+pipeline {
+  agent {
+    label 'golang'
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        echo "Checkout…Checkout…Checkout…Checkout…Checkout…Checkout…Checkout…Checkout11223…"
+      }
+    }
+    stage('trigger pipelineconfig') {
+      steps {
+        echo 'sdf'
+        build(job: 'zjcommon/zjcommon-javatrigger1', wait: false)
+      }
+    }
+  }
+}

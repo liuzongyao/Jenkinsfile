@@ -1,0 +1,36 @@
+pipeline {
+  agent any
+  stages{
+    stage('昵称'){
+        steps{
+            script{
+                result = input message: '设置多个参数1。。', ok: '确认按钮', parameters: [string(defaultValue: 'sese', description: '昵称可以任意输入', name: '请输入你的昵称～～～～', trim: false)], submitter: '提交者jiaozhang'
+            }
+        }
+    }
+    stage('兴趣爱好'){
+        steps{
+            script{
+                result = input message: '设置多个参数2。。', ok: '确认按钮', parameters: [string(defaultValue: '打球 看书 看电影', description: '可以输入多个兴趣爱好', name: '请输入你的兴趣爱好', trim: false)], submitter: '提交者jiaozhang'
+            }
+        }
+    }
+    stage('input score'){
+        steps{
+            script{
+                parallel 'step1': {
+                    result = input message: '设置多个参数33。。', ok: '确认按钮', parameters: [string(defaultValue: '99', description: '', name: '请输入你的成绩1', trim: false)], submitter: '提交者jiaozhang'
+                    sh "echo 'shell scripts to run static tests...'"
+                },
+                'step2': {
+                    result = input message: '设置多个参数34。。', ok: '确认按钮', parameters: [string(defaultValue: '99', description: '', name: '请输入你的成绩2', trim: false)], submitter: '提交者jiaozhang'
+                    sh "echo 'shell scripts to run unit tests...'"
+                },
+                'step3': {
+                    sh "echo 'shell scripts to run integration tests...'"
+                }
+            }
+        }
+    }
+  }
+}

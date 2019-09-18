@@ -1,0 +1,65 @@
+pipeline {
+  agent any
+  
+  stages{
+    stage('simple'){
+      steps{
+        input message: 'Please input your name!请输入你的名字!', ok: 'Confirm',
+          parameters: [string(defaultValue: '哈哈',
+            description: 'This should not be your real name.别名是啥！', name: 'name', trim: true)]
+      }
+    }
+    
+    stage('complex'){
+      parallel {
+        stage('基本信息1'){
+          steps{
+            input message: '请输入你的年龄！', ok: 'Confirm',
+              parameters: [string(defaultValue: '18',
+                description: '你几岁了.', name: 'age', trim: true)]
+          }
+        }
+        stage('基本信息2'){
+          steps{
+            input message: '请输入你的体重', ok: 'Confirm',
+              parameters: [string(defaultValue: '50',
+                description: '你瘦吗？', name: 'weight', trim: true)]
+          }
+        }
+      }
+    }
+    
+    stage('clone'){
+      parallel {
+        stage('one param'){
+          steps{
+            script{
+              result = input message: 'Please input the git branch name!', ok: 'Confirm',
+                parameters: [string(defaultValue: 'master',
+                  description: 'The branch name of git repo', name: 'branchName', trim: true)]
+
+              git branch: result, url: 'http://10.0.128.248:31101/root/jenkinsfile-public.git'
+            }
+          }
+        }
+        
+        stage('multi-param'){
+          steps{
+            script{
+              result = input message: 'Please input the git branch name with debug info!', ok: 'Confirm',
+                parameters: [string(defaultValue: 'master',
+                  description: 'The branch name of git repo', name: 'branchName', trim: true),
+                  string(defaultValue: 'debug info',
+                  description: 'Output the debug info', name: 'debugInfo', trim: true)]
+
+              git branch: result.branchName, url: 'http://10.0.128.248:31101/root/jenkinsfile-public.git'
+              echo result.debugInfo
+            }
+          }
+        }
+        
+      }
+    }
+
+  }
+}
