@@ -42,6 +42,10 @@ pipeline {
         }
       }
     }
+    stage('scan') {
+        echo alaudaContext.isSupport()? "true":"false"
+        echo alaudaContext.getNamespace()
+    }
     stage('Deploy2') {
       steps {
         echo "Deploy2..."
