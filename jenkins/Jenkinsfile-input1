@@ -15,6 +15,13 @@ pipeline {
             }
         }
     }
+    stage('通过否？'){
+        steps{
+            script{
+                result = input message: '设置多个参数4', ok: '通过', parameters: [booleanParam(defaultValue: true, description: '是否开启XX，开启后会XXXXXX.', name: '是否开启XX？？')], submitter: 'a', submitterParameter: 'a'
+            }
+        }
+    }
     stage('input score'){
         steps{
             script{
