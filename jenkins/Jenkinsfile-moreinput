@@ -1,0 +1,12 @@
+pipeline {
+  agent any
+  stages{
+    stage('昵称'){
+        steps{
+            script{
+                result = input message: '设置多个参数1。。', ok: '确认按钮', parameters: [string(defaultValue: 'sese', description: '昵称可以任意输入', name: '请输入你的昵称～～～～', trim: false),string(defaultValue: '打球 看书 看电影', description: '可以输入多个兴趣爱好', name: '请输入你的兴趣爱好', trim: false),string(defaultValue: '99', description: '', name: '请输入你的成绩1', trim: false),string(defaultValue: '90', description: '', name: '请输入你的成绩2', trim: false),string(defaultValue: '60', description: '', name: '请输入你的成绩3', trim: false),string(defaultValue: '59', description: '', name: '请输入你的成绩4', trim: false),string(defaultValue: '50', description: '', name: '请输入你的成绩5', trim: false),string(defaultValue: '999', description: '', name: '请输入你的成绩6', trim: false),string(defaultValue: '996', description: '', name: '请输入你的成绩7', trim: false),string(defaultValue: '666', description: '', name: '请输入你的成绩8', trim: false),string(defaultValue: '100', description: '', name: '请输入你的成绩9', trim: false),string(defaultValue: '10', description: '', name: '请输入你的成绩10', trim: false),booleanParam(defaultValue: true, description: '是否开启XX，开启后会XXXXXX.', name: '是否开启XX？？')], submitter: '提交者jiaozhang'
+            }
+        }
+    }
+  }
+}
