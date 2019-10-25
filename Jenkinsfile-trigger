@@ -5,7 +5,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        echo "Checkout…Checkout…Checkout…Checkout…Checkout…Checkout…Checkout…Checkout11223…"
+        echo "Checkout…Checkout…Checkout…Checkout…Checkout…Checkout…Checkout…Checkout112234…"
       }
     }
     stage('trigger pipelineconfig') {
