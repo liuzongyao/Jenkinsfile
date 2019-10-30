@@ -15,7 +15,7 @@ pipeline {
         stage('channel-1'){
           steps{
             input message: 'Please input your age!', ok: 'Confirm',
-              parameters: [string(defaultValue: '19',
+              parameters: [string(defaultValue: '18',
                 description: 'Just a joke.', name: 'age', trim: true)]
           }
         }
