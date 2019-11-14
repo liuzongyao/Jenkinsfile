@@ -1,7 +1,4 @@
 pipeline{
-
-	
-
 	agent {label "java"}
     options{
         buildDiscarder(logRotator(numToKeepStr: '200'))
@@ -51,7 +48,7 @@ stage("sonar"){
 	steps{
 		container('tools') {
   script {
-    env.CODE_QUALITY_BINDING_NAME = "sonarqube2"
+    env.CODE_QUALITY_BINDING_NAME = "sonar-aa-liuzongyao"
     env.CODE_QUALITY_BINDING_NAMESPACE = "aa-liuzongyao"
     env.CODE_REPOSITORY_KEY = env.CODE_REPO.replace("http://", "").replace("https://", "").replaceAll("/", "-")
     env.CODE_REPOSITORY_NAME = "${CODE_REPOSITORY_KEY}"
