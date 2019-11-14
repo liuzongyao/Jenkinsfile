@@ -13,11 +13,11 @@ pipeline{
 	
 	steps{
 		script {
-  env.CODE_REPO = "http://10.119.21.135:32014/dsp-group/dsp.git"
-  env.CREDENTIAL_ID = "global-credentials-dsp-chanc"
+  env.CODE_REPO = "http://10.0.128.96:31101/root/yili.git"
+  env.CREDENTIAL_ID = "global-credentials-gitlab-jhchen"
   env.RELATIVE_DIRECTORY = "."
   
-  env.BRANCH = "master_uat"
+  env.BRANCH = "master"
 
   def scmVars = checkout([
     $class: 'GitSCM',
@@ -51,8 +51,8 @@ stage("sonar"){
 	steps{
 		container('tools') {
   script {
-    env.CODE_QUALITY_BINDING_NAME = "dsp-sonarqube"
-    env.CODE_QUALITY_BINDING_NAMESPACE = "dsp-uat"
+    env.CODE_QUALITY_BINDING_NAME = "sonarqube2"
+    env.CODE_QUALITY_BINDING_NAMESPACE = "aa-liuzongyao"
     env.CODE_REPOSITORY_KEY = env.CODE_REPO.replace("http://", "").replace("https://", "").replaceAll("/", "-")
     env.CODE_REPOSITORY_NAME = "${CODE_REPOSITORY_KEY}"
     if (env.SVN_REVISION) {
