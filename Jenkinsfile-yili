@@ -1,0 +1,127 @@
+pipeline{
+
+	
+
+	agent {label "java"}
+    options{
+        buildDiscarder(logRotator(numToKeepStr: '200'))
+	}
+
+	stages{
+		stage("clone"){
+
+	
+	steps{
+		script {
+  env.CODE_REPO = "http://10.119.21.135:32014/dsp-group/dsp.git"
+  env.CREDENTIAL_ID = "global-credentials-dsp-chanc"
+  env.RELATIVE_DIRECTORY = "."
+  
+  env.BRANCH = "master_uat"
+
+  def scmVars = checkout([
+    $class: 'GitSCM',
+    branches: [[name: "${BRANCH}"]],
+    extensions: [[
+      $class: 'SubmoduleOption',
+      recursiveSubmodules: true,
+      reference: '',
+    ],[
+      $class: 'RelativeTargetDirectory',
+      relativeTargetDir: "${RELATIVE_DIRECTORY}"
+    ]],
+    userRemoteConfigs: [[
+      credentialsId: "${CREDENTIAL_ID}",
+      url: "${CODE_REPO}"
+    ]]
+  ])
+
+  env.GIT_COMMIT = scmVars.GIT_COMMIT
+  env.GIT_BRANCH = scmVars.GIT_BRANCH
+  env.GIT_BRANCH_AS_TAG = scmVars.GIT_BRANCH.replaceFirst("origin/","").replaceAll("/","-")
+
+  
+}
+}
+}
+
+stage("sonar"){
+
+	
+	steps{
+		container('tools') {
+  script {
+    env.CODE_QUALITY_BINDING_NAME = "dsp-sonarqube"
+    env.CODE_QUALITY_BINDING_NAMESPACE = "dsp-uat"
+    env.CODE_REPOSITORY_KEY = env.CODE_REPO.replace("http://", "").replace("https://", "").replaceAll("/", "-")
+    env.CODE_REPOSITORY_NAME = "${CODE_REPOSITORY_KEY}"
+    if (env.SVN_REVISION) {
+      env.BRANCH = env.SVN_REVISION
+    }
+
+    if (env.GIT_BRANCH) {
+      env.BRANCH = env.GIT_BRANCH.replaceFirst("origin/","")
+    }
+    
+    if (env.BRANCH.equals("*/master")) {
+      env.BRANCH = "master"
+    }
+
+    if (fileExists('sonar-project.properties')) {
+      env.ANALYSIS_PARAMETERS = ""
+    } else {
+      env.ANALYSIS_PARAMETERS = """sonar.sources=./src
+sonar.sources=./
+sonar.exclusions=**/*.js
+sonar.java.binaries=./
+sonar.sourceEncoding=UTF-8""".replaceAll("\r\n"," ").replaceAll("\n", " ").replaceAll("sonar", "-D sonar")
+    }
+
+    
+
+    alaudaPlatform.withBindInProjectSonarEnv("${CODE_QUALITY_BINDING_NAMESPACE}", "${CODE_QUALITY_BINDING_NAME}"){
+      sh "#!/bin/sh -e\n" + "sonar-scanner -D sonar.host.url=${SONAR_SERVER_URL} -D sonar.login=${SONAR_TOKEN} -D sonar.projectName=${CODE_REPOSITORY_NAME} -D sonar.projectKey=${CODE_REPOSITORY_KEY} ${ANALYSIS_PARAMETERS}"
+
+      timeout(time: 1, unit: 'HOURS') {
+        def statusCode = sh script: "#!/bin/sh -e\n" + "cmdclient taskmonitor --host=${SONAR_SERVER_URL} --token=${SONAR_TOKEN}", returnStatus:true
+
+        // status codes come from bergamot cmdclient - https://github.com/alauda/bergamot/blob/master/sonarqube/cmdclient/cmd/task_monitor.go
+        def QUALITY_GATE_SUCCESS = 0
+        def QUALITY_GATE_WARN = 134
+        def QUALITY_GATE_ERROR = 133
+        def QUALITY_GATE_UNKNOW = 135
+
+        def projectLink = "${SONAR_SERVER_URL}"
+        if (!projectLink.endsWith("/")) {
+          projectLink = projectLink + "/"
+        }
+
+        projectLink = projectLink + "dashboard?id=${CODE_REPOSITORY_KEY}&branch=${BRANCH}"
+
+        switch(statusCode) {
+          case QUALITY_GATE_SUCCESS:
+            sh "echo \"Quality Gate Status of Project ${CODE_REPOSITORY_NAME} is OK\""
+            addBadge icon: 'green.gif', text: 'OK', id: 'QualityGate', link: projectLink
+            break
+          case QUALITY_GATE_WARN:
+            sh "echo \"Quality Gate Status of Project ${CODE_REPOSITORY_NAME} is WARN\""
+            addBadge icon: 'yellow.gif', text: 'WARN', id: 'QualityGate', link: projectLink
+            break
+          case QUALITY_GATE_ERROR:
+            sh "echo \"Quality Gate Status of Project ${CODE_REPOSITORY_NAME} is ERROR\""
+            addBadge icon: 'red.gif', text: 'ERROR', id: 'QualityGate', link: projectLink
+            
+            break
+          default:
+            sh "echo \"Quality Gate Status of Project ${CODE_REPOSITORY_NAME} is UNKOWN\""
+            break
+        }
+      }
+    }
+  }
+}
+}
+}
+
+}
+}
