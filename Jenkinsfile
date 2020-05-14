@@ -5,7 +5,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        echo "Checkout…Checkout…Checkout…Checkout…Checkout…Checkout…Checkout…Checkout1233577`s22…"
+        echo "Checkout"
       }
     }
     stage('CI') {
